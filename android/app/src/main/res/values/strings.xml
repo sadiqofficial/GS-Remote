@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Momiji</string>
+    <string name="app_name" translatable="false">GS Remote</string>
     <string name="title_settings">Settings</string>
     <string name="alert_message_standby_wakeup">The console is in rest mode. Wake it up and connect as soon as it\'s ready, instead of connecting right away?</string>
     <string name="alert_message_session_create_error">Failed to create Session: %s</string>
