@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -23,6 +23,13 @@ jobs:
             third-party/json-c \
             third-party/miniupnp \
             android/app/src/main/cpp/oboe
+
+      - name: Install build tools (protoc, python protobuf)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler python3-protobuf ninja-build
+          protoc --version
+          python3 -c "import google.protobuf; print('python protobuf OK')"
 
       - uses: actions/setup-java@v4
         with:
@@ -46,15 +53,15 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleFdroidDebug --no-daemon --console=plain --warning-mode none > build_output.txt 2>&1 || {
-            echo "=============== ERROR LINES ==============="
-            grep -n -E "error:|error\(|^e: |FAILED|What went wrong|Execution failed|Caused by|not found|No such file" build_output.txt | head -40
-            echo "=============== LAST 40 LINES ==============="
-            tail -n 40 build_output.txt
+            echo "=============== FIRST ERRORS ==============="
+            grep -n -m 3 -B2 -A8 -E "What went wrong|CMake Error|error:|^e: " build_output.txt
+            echo "=============== LAST 25 LINES ==============="
+            tail -n 25 build_output.txt
             exit 1
           }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pspad-debug-apk
+          name: gsremote-debug-apk
           path: android/app/build/outputs/apk/fdroid/debug/*.apk
           if-no-files-found: error
