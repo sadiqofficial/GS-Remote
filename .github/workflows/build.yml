@@ -1,0 +1,51 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch needed submodules
+        run: |
+          git submodule update --init --recursive --depth 1 -- \
+            third-party/nanopb \
+            third-party/jerasure \
+            third-party/gf-complete \
+            third-party/curl \
+            third-party/mbedtls \
+            third-party/json-c \
+            third-party/miniupnp \
+            android/app/src/main/cpp/oboe
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" \
+            "ndk;26.1.10909125" "cmake;3.22.1"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleFdroidDebug --no-daemon --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pspad-debug-apk
+          path: android/app/build/outputs/apk/fdroid/debug/*.apk
+          if-no-files-found: error
