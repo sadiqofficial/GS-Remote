@@ -45,7 +45,13 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleFdroidDebug --no-daemon --stacktrace
+          ./gradlew assembleFdroidDebug --no-daemon --console=plain --warning-mode none > build_output.txt 2>&1 || {
+            echo "=============== ERROR LINES ==============="
+            grep -n -E "error:|error\(|^e: |FAILED|What went wrong|Execution failed|Caused by|not found|No such file" build_output.txt | head -40
+            echo "=============== LAST 40 LINES ==============="
+            tail -n 40 build_output.txt
+            exit 1
+          }
 
       - uses: actions/upload-artifact@v4
         with:
