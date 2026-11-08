@@ -26,7 +26,7 @@ android {
     compileSdk 36
     ndkVersion '26.1.10909125'
     defaultConfig {
-        applicationId "io.github.yazanj082.momiji"
+        applicationId "com.gsremote.app"
         minSdk 24
         targetSdk 36
         versionCode 24
